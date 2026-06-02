@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사투리 앱 중간발표</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --accent: #e8b44a;
+    --accent2: #c84b4b;
+    --text: #f0ede6;
+    --text-muted: #8a8a9a;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slides-wrapper {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* 슬라이드 1 — 타이틀 */
+  .slide-title {
+    text-align: center;
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(232, 180, 74, 0.15);
+    border: 1px solid rgba(232, 180, 74, 0.3);
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    padding: 6px 18px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .main-title {
+    font-size: 88px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+
+  .main-title span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 20px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-bottom: 48px;
+  }
+
+  .meta-row { display: none; }
+
+  /* 슬라이드 공통 */
+  .slide-inner {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .slide-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .slide-heading {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 48px;
+    line-height: 1.1;
+  }
+
+  /* 카드 그리드 */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .card-grid.col2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.col3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid.col4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .card.accent-border {
+    border-color: rgba(232, 180, 74, 0.3);
+  }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .card-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* 아키텍처 다이어그램 */
+  .arch-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .arch-layer {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .arch-layer.highlight {
+    border-color: rgba(232, 180, 74, 0.4);
+    background: rgba(232, 180, 74, 0.05);
+  }
+
+  .arch-arrow {
+    font-size: 24px;
+    color: var(--text-muted);
+    padding: 0 12px;
+    flex-shrink: 0;
+  }
+
+  .arch-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .arch-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .arch-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* 기술 스택 행 */
+  .tech-row {
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 24px;
+  }
+
+  .tech-row:last-child { border-bottom: none; }
+
+  .tech-name {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 220px;
+    color: var(--text);
+  }
+
+  .tech-name span {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 2px;
+  }
+
+  .tech-reason {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .tech-badge {
+    background: rgba(232, 180, 74, 0.12);
+    border: 1px solid rgba(232, 180, 74, 0.25);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* 향후계획 타임라인 */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .timeline-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .timeline-dot.done {
+    background: #3d9e6e;
+  }
+
+  .timeline-dot.next {
+    background: var(--accent2);
+  }
+
+  .timeline-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    min-height: 32px;
+    margin: 4px 0;
+  }
+
+  .timeline-content {
+    padding-bottom: 32px;
+    flex: 1;
+  }
+
+  .timeline-week {
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .timeline-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .timeline-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .status-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .status-done { background: rgba(61, 158, 110, 0.15); color: #3d9e6e; border: 1px solid rgba(61, 158, 110, 0.3); }
+  .status-wip { background: rgba(232, 180, 74, 0.15); color: var(--accent); border: 1px solid rgba(232, 180, 74, 0.3); }
+  .status-next { background: rgba(200, 75, 75, 0.15); color: var(--accent2); border: 1px solid rgba(200, 75, 75, 0.3); }
+
+  /* 내비게이션 */
+  .nav {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .slide-counter {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .slide-counter span { color: var(--accent); font-weight: 600; }
+
+  /* 슬라이드 번호 */
+  .slide-num {
+    position: fixed;
+    top: 36px;
+    right: 48px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    z-index: 100;
+  }
+
+  /* 진행바 */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+    z-index: 200;
+  }
+
+  /* 두 컬럼 레이아웃 */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .feature-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .feature-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .feature-text small {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* 큰 숫자 스탯 */
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 40px;
+    font-weight: 900;
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-num" id="slideNum">01 / 06</div>
+
+<div class="slides-wrapper" id="slidesWrapper">
+
+  <!-- 슬라이드 1: 타이틀 -->
+  <div class="slide slide-title active" data-index="0">
+    <div class="tag">신구대학교 컴퓨터소프트웨어과 · 2022136049 정훈희</div>
+    <div class="main-title">사<span>투</span>리</div>
+    <div class="subtitle">대한민국 6개 지역 방언 음성 인식 학습 앱</div>
+    <div class="meta-row">
+      <div><strong>플랫폼</strong> Flutter (Dart)</div>
+      <div><strong>지역</strong> 서울 · 경상 · 전라 · 충청 · 강원 · 제주</div>
+      <div><strong>발표일</strong> 2026.06</div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 2: 주요 기능 -->
+  <div class="slide" data-index="1">
+    <div class="slide-inner">
+      <div class="slide-label">Core Features</div>
+      <div class="slide-heading">주요 기능</div>
+
+      <div style="background: var(--surface); border: 1px solid rgba(232,180,74,0.25); border-radius: 12px; padding: 18px 24px; margin-bottom: 28px; font-size: 15px; color: var(--text-muted); line-height: 1.7;">
+        다른 지역 사투리를 듣고 직접 따라 말하며 배울 수 있는 <strong style="color: var(--text)">음성 인식 기반 방언 학습 앱</strong>. 각 지역 방언을 TTS로 먼저 듣고, 녹음 후 AI가 발음 유사도를 채점해 즉각적인 피드백을 제공한다.
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-number">6</div><div class="stat-label">지역 방언</div></div>
+        <div class="stat-card"><div class="stat-number">90</div><div class="stat-label">학습 문장</div></div>
+        <div class="stat-card"><div class="stat-number">0~100</div><div class="stat-label">발음 점수</div></div>
+        <div class="stat-card"><div class="stat-number">4단계</div><div class="stat-label">피드백</div></div>
+      </div>
+
+      <div class="card-grid col3">
+        <div class="card">
+          <div class="card-icon">🗺️</div>
+          <div class="card-title">지역 선택</div>
+          <div class="card-desc">서울, 부산, 전라, 충청, 강원, 제주 6개 지역 중 선택. 각 지역별 방언 특성과 대표 표현 제공.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔊</div>
+          <div class="card-title">원어민 발음 듣기</div>
+          <div class="card-desc">flutter_tts 기반 TTS로 각 방언 문장의 정확한 발음을 먼저 청취. 표준어 번역 함께 표시.</div>
+        </div>
+        <div class="card accent-border">
+          <div class="card-icon">🎙️</div>
+          <div class="card-title">음성 인식 채점</div>
+          <div class="card-desc">speech_to_text로 실시간 인식 후 Levenshtein distance 알고리즘으로 0~100점 채점. 즉각 피드백 제공.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 3: 시스템 아키텍처 -->
+  <div class="slide" data-index="2">
+    <div class="slide-inner">
+      <div class="slide-label">System Architecture</div>
+      <div class="slide-heading">시스템 아키텍처</div>
+
+      <div class="arch-diagram">
+        <div class="arch-layer">
+          <div class="arch-label">UI Layer</div>
+          <div class="arch-items">
+            <div class="arch-item">지역 선택 화면</div>
+            <div class="arch-item">문장 목록 화면</div>
+            <div class="arch-item">녹음 연습 화면</div>
+            <div class="arch-item">결과 / 점수 화면</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">→</div>
+
+        <div class="arch-layer highlight">
+          <div class="arch-label">Core Logic</div>
+          <div class="arch-items">
+            <div class="arch-item">speech_to_text</div>
+            <div class="arch-item">flutter_tts</div>
+            <div class="arch-item">Levenshtein 채점</div>
+            <div class="arch-item">WaveRing 애니메이션</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">→</div>
+
+        <div class="arch-layer">
+          <div class="arch-label">Data Layer</div>
+          <div class="arch-items">
+            <div class="arch-item">dialect_data.dart</div>
+            <div class="arch-item">6지역 × 15문장</div>
+            <div class="arch-item">표준어 매핑</div>
+            <div class="arch-item">로컬 내장 데이터</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 12px; font-size: 13px; color: var(--text-muted);">
+        <div style="background: var(--surface); border-radius: 8px; padding: 12px 20px; flex: 1; border: 1px solid var(--border);">
+          📁 <strong style="color: var(--text)">lib/</strong> — main.dart · data/ · screens/ · widgets/ · utils/ · theme/
+        </div>
+        <div style="background: var(--surface); border-radius: 8px; padding: 12px 20px; flex: 1; border: 1px solid var(--border);">
+          🌐 <strong style="color: var(--text)">배포</strong> — flutter run -d chrome (웹) · 추후 APK 배포 예정
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 4: 프론트엔드 / 백엔드 -->
+  <div class="slide" data-index="3">
+    <div class="slide-inner">
+      <div class="slide-label">Frontend & Backend</div>
+      <div class="slide-heading">프론트엔드 / 백엔드</div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="section-label">Frontend — UI / 사용자 경험</div>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                Flutter Material Design 3
+                <small>StatefulWidget 기반 반응형 UI. 한국어 최적화 레이아웃.</small>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                4단계 피드백 메시지
+                <small>90 / 70 / 50점 기준 구간별 한국어 피드백 + 효과음.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label">Backend — 음성 처리 / 채점</div>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                speech_to_text (ko_KR)
+                <small>기기 내장 STT 엔진 사용. 서버 없이 로컬 처리. 실시간 인식.</small>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                flutter_tts
+                <small>한국어 TTS 엔진으로 방언 문장 발음 재생. 속도/피치 조절 가능.</small>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                Levenshtein Distance 알고리즘
+                <small>순수 Dart 구현. 문자열 편집 거리로 발음 유사도 0~100점 산출.</small>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-dot"></div>
+              <div class="feature-text">
+                로컬 내장 데이터베이스
+                <small>서버 불필요. dialect_data.dart에 6지역 × 15문장 정적 관리.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 5: 기술 선택 이유 -->
+  <div class="slide" data-index="4">
+    <div class="slide-inner">
+      <div class="slide-label">Tech Decisions</div>
+      <div class="slide-heading">왜 이 기술을 선택했나</div>
+
+      <div style="border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+        <div class="tech-row" style="padding: 20px 28px;">
+          <div class="tech-name"><span>Framework</span>Flutter</div>
+          <div class="tech-reason">iOS · Android · Web 단일 코드베이스. Dart 언어로 음성 처리 로직과 UI를 분리 없이 관리 가능. 빠른 프로토타이핑에 최적.</div>
+          <div class="tech-badge">크로스플랫폼</div>
+        </div>
+        <div class="tech-row" style="padding: 20px 28px; border-top: 1px solid var(--border);">
+          <div class="tech-name"><span>STT Package</span>speech_to_text</div>
+          <div class="tech-reason">서버 없이 기기 내장 STT 엔진 활용. API 키 불필요, 비용 없음. ko_KR 한국어 인식 지원. 오프라인 동작 가능.</div>
+          <div class="tech-badge">서버리스</div>
+        </div>
+        <div class="tech-row" style="padding: 20px 28px; border-top: 1px solid var(--border);">
+          <div class="tech-name"><span>Algorithm</span>Levenshtein</div>
+          <div class="tech-reason">두 문자열의 최소 편집 거리를 계산. 방언 특유의 어미 변형을 글자 단위로 비교해 정확한 유사도 산출. 순수 Dart로 외부 의존 없이 구현.</div>
+          <div class="tech-badge">O(m×n)</div>
+        </div>
+        <div class="tech-row" style="padding: 20px 28px; border-top: 1px solid var(--border);">
+          <div class="tech-name"><span>AI Tool</span>Claude Code</div>
+          <div class="tech-reason">전체 개발 과정에서 AI Agent 활용. 음성 인식 로직, 채점 알고리즘, UI 컴포넌트 모두 Claude Code로 구현 후 직접 코드 검토.</div>
+          <div class="tech-badge">AI-assisted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 6: 향후 계획 -->
+  <div class="slide" data-index="5">
+    <div class="slide-inner">
+      <div class="slide-label">Roadmap</div>
+      <div class="slide-heading">향후 계획</div>
+
+      <div class="two-col">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-left">
+              <div class="timeline-dot done"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-week">9~12주차 · 완료</div>
+              <div class="timeline-title">기본 기능 구현 <span class="status-badge status-done">완료</span></div>
+              <div class="timeline-desc">6개 지역 데이터, 음성인식, TTS, Levenshtein 채점, UI 구현</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-left">
+              <div class="timeline-dot"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-week">13주차</div>
+              <div class="timeline-title">Claude API 연동 <span class="status-badge status-wip">예정</span></div>
+              <div class="timeline-desc">억양·악센트 구체적 피드백 고도화. "어디서 강세를 줘야 하는지" 분석</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-left">
+              <div class="timeline-dot"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-week">14주차</div>
+              <div class="timeline-title">사투리 퀴즈 모드 <span class="status-badge status-wip">예정</span></div>
+              <div class="timeline-desc">방언 듣고 어느 지역인지 맞추는 게임 모드 추가. 학습 흥미 유발.</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-left">
+              <div class="timeline-dot next"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-week">15주차 · 최종</div>
+              <div class="timeline-title">APK 배포 + 최종 발표 <span class="status-badge status-next">목표</span></div>
+              <div class="timeline-desc">실제 안드로이드 기기 배포. GitHub Pages 웹 버전 유지. 테스트 완비.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 내비게이션 -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>←</button>
+  <div class="slide-counter"><span id="currentSlide">1</span> / 6</div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">→</button>
+</div>
+
+<script>
+  let current = 0;
+  const total = 6;
+  const slides = document.querySelectorAll('.slide');
+
+  function changeSlide(dir) {
+    slides[current].classList.remove('active');
+    if (dir > 0) {
+      slides[current].classList.add('prev');
+    } else {
+      slides[current].classList.remove('prev');
+      slides[current].style.transform = 'translateX(60px)';
+      slides[current].style.opacity = '0';
+      setTimeout(() => { slides[current].style.transform = ''; slides[current].style.opacity = ''; }, 10);
+    }
+
+    current += dir;
+    if (current < 0) current = 0;
+    if (current >= total) current = total - 1;
+
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      s.style.transform = '';
+      s.style.opacity = '';
+      if (i < current) s.classList.add('prev');
+    });
+
+    slides[current].classList.add('active');
+
+    document.getElementById('currentSlide').textContent = current + 1;
+    document.getElementById('slideNum').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    document.getElementById('progressBar').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+  });
+
+  document.getElementById('progressBar').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
